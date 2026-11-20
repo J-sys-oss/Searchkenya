@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: searchkenya-indexer
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi_prod:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SK_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false

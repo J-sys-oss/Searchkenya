@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Dashboard{% endblock %}
+{% block h1 %}Real-Time Monitoring &amp; Discrepancy Dashboard{% endblock %}
+{% block body %}
+<div id="live" class="cards">
+ <div class="card blue"><div class="lbl">Total Crawled</div><div class="val" id="v-total">{{ "{:,}".format(s.total_crawled) }}</div></div>
+ <div class="card amber"><div class="lbl">Pending Queue</div><div class="val" id="v-pending">{{ "{:,}".format(s.pending) }}</div></div>
+ <div class="card red"><div class="lbl">Index Discrepancies Detected</div><div class="val" id="v-disc">{{ s.open_discrepancies }}</div></div>
+ <div class="card blue"><div class="lbl">Freshness Index Accuracy</div><div class="val" id="v-fresh">{{ s.freshness }}%</div></div>
+</div>
+<p class="muted">Auto-refreshing every 5 seconds. Last update: <span id="v-updated">just now</span></p>
+<h2>Discrepancy Log</h2>
+<table><thead><tr><th>Log Timestamp (UTC)</th><th>Source URL</th><th>Discrepancy Detected</th><th>Resolution Status</th></tr></thead><tbody>
+{% for l in logs %}<tr><td>{{ l.detected_at }}</td><td>{{ l.page_url }}</td>
+<td title="{{ l.detail or '' }}">{{ {'outdated_cache':'Obsolete Content Cached','unindexed_new':'Missing Page in Index','broken_link':'Broken Link (404/410)'}.get(l.issue_type, l.issue_type) }}</td>
+<td>{% if l.resolved %}<span class="ok">{{ {'auto_reindexed':'Auto-Reindexed','indexed_by_crawl':'Indexed by Crawl','de_indexed':'De-indexed','recovered':'Recovered'}.get(l.resolution, l.resolution) }}</span>
+{% else %}<span class="warn">Open - queued for reconciliation</span>{% endif %}</td></tr>
+{% else %}<tr><td colspan="4" class="muted">No discrepancies logged yet.</td></tr>{% endfor %}</tbody></table>
+<p style="margin-top:18px">
+<form class="inline" method="post" action="{{ url_for('reconcile') }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="primary" type="submit">Run Reconciliation Now</button></form>
+<a class="btn primary" href="{{ url_for('report') }}">Generate Audit Report</a></p>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}Crawl Queue{% endblock %}
+{% block h1 %}Crawling Queue &amp; Index Management{% endblock %}
+{% block body %}
+<h2>Active Crawl Queue</h2>
+<table><thead><tr><th>URL / Domain</th><th>Last Crawled</th><th>HTTP Status</th><th>Index Status</th><th>Actions</th></tr></thead><tbody>
+{% for p in pages %}<tr><td>{{ p.page_url }}</td><td>{{ p.last_crawled or '-' }}</td>
+<td class="{{ 'ok' if p.http_status==200 else 'bad' }}">{{ p.http_status or '-' }}</td>
+<td class="{{ {'indexed':'ok','pending_update':'warn','pending':'warn','obsolete':'bad'}.get(p.index_status,'') }}">{{ p.index_status.replace('_',' ').title() }}</td>
+<td>{% if p.index_status != 'obsolete' %}
+<form class="inline" method="post" action="{{ url_for('recrawl', page_id=p.page_id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>Recrawl</button></form>
+<form class="inline" method="post" action="{{ url_for('remove_page', page_id=p.page_id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>Remove</button></form>
+{% else %}<form class="inline" method="post" action="{{ url_for('remove_page', page_id=p.page_id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>De-index</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="5" class="muted">The index is empty. Add a seed URL below.</td></tr>{% endfor %}</tbody></table>
+<form class="addform" method="post" action="{{ url_for('add_seed') }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div><label for="su">Seed URL</label><input class="wide" id="su" name="seed_url" type="url" placeholder="https://example.co.ke" required></div>
+<div><label for="cd">Crawl depth (0-3)</label><input id="cd" name="crawl_depth" type="number" min="0" max="3" value="1" style="width:90px"></div>
+<button class="primary" type="submit">+ Add New Seed URL</button></form>
+<h2>Crawl Jobs</h2>
+<table><thead><tr><th>Job</th><th>Seed URL</th><th>Depth</th><th>Scheduled (UTC)</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+{% for j in jobs %}<tr><td>#{{ j.job_id }}</td><td>{{ j.seed_url }}</td><td>{{ j.crawl_depth }}</td><td>{{ j.scheduled_at }}</td><td>{{ j.status }}</td>
+<td>{% if j.status in ('pending','stopped','done','failed') %}<form class="inline" method="post" action="{{ url_for('run_job', job_id=j.job_id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>Run</button></form>{% endif %}
+{% if j.status=='running' %}<form class="inline" method="post" action="{{ url_for('stop_job', job_id=j.job_id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button>Stop</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">No jobs yet.</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

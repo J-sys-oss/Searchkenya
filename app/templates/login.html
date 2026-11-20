@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Login{% endblock %}
+{% block body %}
+<div class="login"><h1>SearchKenya Indexer - Administrator Login</h1>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div><label for="u">Username</label><br><input id="u" name="username" type="text" required autofocus style="width:100%"></div>
+<div><label for="p">Password</label><br><input id="p" name="password" type="password" required style="width:100%"></div>
+<button class="primary" type="submit">Log in</button></form></div>
+{% endblock %}

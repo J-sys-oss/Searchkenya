@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}SearchKenya Indexer{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body>
+{% if session.get('user_id') %}
+<header class="top"><h1>{% block h1 %}Automated Indexing Management{% endblock %}</h1>
+<nav><a href="{{ url_for('dashboard') }}">Dashboard</a><a href="{{ url_for('queue') }}">Crawl Queue</a>
+<a href="{{ url_for('report') }}">Audit Report</a><a href="{{ url_for('search') }}">Search</a></nav>
+<form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<button class="link" type="submit">Logout ({{ session.username }})</button></form></header>
+{% endif %}
+<main>
+{% for cat, msg in get_flashed_messages(with_categories=true) %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% block body %}{% endblock %}
+</main>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

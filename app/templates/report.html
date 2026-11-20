@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Audit Report{% endblock %}
+{% block h1 %}System Analytics &amp; Audit Report{% endblock %}
+{% block body %}
+<h2>CRAWL EFFICIENCY REPORT</h2>
+<div class="cards"><div class="card blue"><div class="lbl">Average Crawl Latency</div><div class="val">{{ s.avg_latency_ms }} ms</div></div>
+<div class="card blue"><div class="lbl">Freshness Index Accuracy</div><div class="val">{{ s.freshness }}%</div></div></div>
+<h2>Top Discrepancy Categories</h2>
+{% for c in s.categories %}<div class="catrow"><div>{{ c.label }}</div><div class="bar"><span data-pct="{{ c.pct }}"></span></div><div>{{ c.pct }}%</div></div>{% endfor %}
+<p style="margin-top:20px"><a class="btn primary" href="{{ url_for('export_pdf') }}">Export PDF Report</a> <a class="btn primary" href="{{ url_for('export_csv') }}">Export CSV Logs</a></p>
+{% endblock %}
